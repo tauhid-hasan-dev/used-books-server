@@ -26,6 +26,12 @@ async function run() {
 
         console.log('databse connected.....');
 
+        app.get('/categories', async (req, res) => {
+            const query = {};
+            const categories = await categoryCollection.find(query).toArray();
+            res.send(categories);
+        })
+
     } finally {
 
 
