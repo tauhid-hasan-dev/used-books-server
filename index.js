@@ -23,6 +23,7 @@ async function run() {
     try {
         const usersCollection = client.db("usedBooks").collection("users");
         const categoryCollection = client.db("usedBooks").collection("categories");
+        const booksCollection = client.db("usedBooks").collection("books");
 
         console.log('databse connected.....');
 
@@ -30,6 +31,13 @@ async function run() {
             const query = {};
             const categories = await categoryCollection.find(query).toArray();
             res.send(categories);
+        })
+
+        app.post('/allbooks', async (req, res) => {
+            const doc = req.body;
+            console.log(doc);
+            const book = await booksCollection.insertOne(doc);
+            res.send(book);
         })
 
     } finally {
