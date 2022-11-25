@@ -24,6 +24,7 @@ async function run() {
         const usersCollection = client.db("usedBooks").collection("users");
         const categoryCollection = client.db("usedBooks").collection("categories");
         const booksCollection = client.db("usedBooks").collection("books");
+        const bookingCollection = client.db("usedBooks").collection("bookings");
 
         console.log('databse connected.....');
 
@@ -56,7 +57,6 @@ async function run() {
             }
         })
 
-
         app.get('/books/:categoryId', async (req, res) => {
             const id = req.params.categoryId;
             console.log(id)
@@ -88,7 +88,20 @@ async function run() {
             res.send(seller);
         })
 
+        //storing booking info
+        app.post('/bookings', async (req, res) => {
+            const doc = req.body;
+            const bookedItem = await bookingCollection.insertOne(doc);
+            res.send(bookedItem);
+        })
 
+
+        //getting bookings
+        app.get('/bookings', async (req, res) => {
+            const query = {}
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings)
+        })
 
 
 
