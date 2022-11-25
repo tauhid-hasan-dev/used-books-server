@@ -41,11 +41,19 @@ async function run() {
             res.send(book);
         })
 
+        //storing user info to the database and preventing google users data duplicating
         app.post('/users', async (req, res) => {
             const doc = req.body;
-            console.log(doc);
-            const user = await usersCollection.insertOne(doc);
-            res.send(user);
+            const query = {
+                email: doc.email
+            }
+            const isExits = await usersCollection.findOne(query)
+            if (isExits) {
+                return res.send({ message: 'This user already exists' })
+            } else {
+                const user = await usersCollection.insertOne(doc);
+                res.send(user);
+            }
         })
 
 
