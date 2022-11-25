@@ -27,6 +27,7 @@ async function run() {
 
         console.log('databse connected.....');
 
+
         app.get('/categories', async (req, res) => {
             const query = {};
             const categories = await categoryCollection.find(query).toArray();
@@ -39,6 +40,29 @@ async function run() {
             const book = await booksCollection.insertOne(doc);
             res.send(book);
         })
+
+        app.post('/users', async (req, res) => {
+            const doc = req.body;
+            console.log(doc);
+            const user = await usersCollection.insertOne(doc);
+            res.send(user);
+        })
+
+
+        app.get('/books/:categoryId', async (req, res) => {
+            const id = req.params.categoryId;
+            console.log(id)
+            const query = {
+                categoryId: id,
+            };
+            const books = await booksCollection.find(query).toArray();
+            res.send(books);
+        })
+
+
+
+
+
 
     } finally {
 
