@@ -59,6 +59,26 @@ async function run() {
             res.send(books);
         })
 
+        //all books by email(seller)
+        app.get('/books', async (req, res) => {
+            const email = req.query.email;
+            const query = {
+                sellerEmail: email
+            }
+            const books = await booksCollection.find(query).toArray();
+            res.send(books);
+        })
+
+        //all seller all buyers
+        app.get('/users', async (req, res) => {
+            const role = req.query.role;
+            console.log(role)
+            const query = {
+                userRole: role,
+            }
+            const seller = await usersCollection.find(query).toArray();
+            res.send(seller);
+        })
 
 
 
