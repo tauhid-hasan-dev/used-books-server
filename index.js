@@ -70,6 +70,27 @@ async function run() {
         })
 
 
+        //checking if user has the role called "seller"
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            console.log(user)
+            res.send({ isSeller: user?.userRole === 'seller' });
+        })
+
+        //checking if user has the role called "seller"
+        app.get('/users/buyer/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            console.log(user)
+            res.send({ isBuyer: user?.userRole === 'buyer' });
+        })
+
+
 
         //api for sending jwt token to the client
         app.get('/jwt', async (req, res) => {
