@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express();
 require('dotenv').config();
+var jwt = require('jsonwebtoken');
 
 
 const port = process.env.PORT || 5000;
@@ -27,6 +28,21 @@ async function run() {
         const bookingCollection = client.db("usedBooks").collection("bookings");
 
         console.log('databse connected.....');
+
+
+        //api for sending jwt token to the client
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            console.log(email)
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+                return res.send({ accessToken: token });
+            }
+            console.log(user)
+            res.status(403).send({ accessToken: '' })
+        })
 
 
         app.get('/categories', async (req, res) => {
@@ -57,6 +73,7 @@ async function run() {
             }
         })
 
+        //getting books by category
         app.get('/books/:categoryId', async (req, res) => {
             const id = req.params.categoryId;
             console.log(id)
@@ -67,7 +84,7 @@ async function run() {
             res.send(books);
         })
 
-        //all books by email(seller)
+        //all books by email(posted books of the seller)
         app.get('/books', async (req, res) => {
             const email = req.query.email;
             const query = {
@@ -77,7 +94,7 @@ async function run() {
             res.send(books);
         })
 
-        //all seller all buyers
+        //all seller all buyers by role 
         app.get('/users', async (req, res) => {
             const role = req.query.role;
             console.log(role)
