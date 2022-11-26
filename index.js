@@ -30,7 +30,6 @@ function verifyJwt(req, res, next) {
 }
 
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.jjvuikj.mongodb.net/?retryWrites=true&w=majority`;
 //console.log(uri)
 
@@ -59,6 +58,17 @@ async function run() {
             const bookings = await bookingCollection.find(query).toArray();
             res.send(bookings)
         })
+
+        //checking if user has the role called "admin"
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            console.log(user)
+            res.send({ isAdmin: user?.userRole === 'admin' });
+        })
+
 
 
         //api for sending jwt token to the client
