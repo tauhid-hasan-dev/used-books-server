@@ -37,11 +37,14 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
+                //for login if user already in users collection
                 const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
                 return res.send({ accessToken: token });
+            } else {
+                //for sign up only if user is new entry to the site
+                return res.send({ accessToken: token });
             }
-            console.log(user)
-            res.status(403).send({ accessToken: '' })
+
         })
 
 
