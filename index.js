@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 var jwt = require('jsonwebtoken');
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 
 const port = process.env.PORT || 5000;
@@ -59,10 +60,19 @@ async function run() {
             res.send(bookings)
         })
 
+
+        app.get('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: ObjectId(id) };
+            const booking = await bookingCollection.findOne(query)
+            res.send(booking);
+        })
+
         //checking if user has the role called "admin"
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            //console.log(email);
             const query = { email }
             const user = await usersCollection.findOne(query);
             console.log(user)
@@ -73,7 +83,7 @@ async function run() {
         //checking if user has the role called "seller"
         app.get('/users/seller/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            //console.log(email);
             const query = { email }
             const user = await usersCollection.findOne(query);
             console.log(user)
@@ -83,7 +93,7 @@ async function run() {
         //checking if user has the role called "seller"
         app.get('/users/buyer/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            //console.log(email);
             const query = { email }
             const user = await usersCollection.findOne(query);
             console.log(user)
@@ -176,6 +186,22 @@ async function run() {
             const doc = req.body;
             const bookedItem = await bookingCollection.insertOne(doc);
             res.send(bookedItem);
+        })
+
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking.productPrice;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                "payment_method_types": [
+                    "card"
+                ],
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
         })
 
 
