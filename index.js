@@ -12,10 +12,27 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+function verifyJwt(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).send("Unauthorized Access")
+    }
+    const token = authHeader.split(' ')[1];
+    //console.log(token);
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send('Forbidden Access')
+        }
+        req.decoded = decoded;
+        next();
+    })
+
+}
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.jjvuikj.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri)
+//console.log(uri)
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -27,13 +44,27 @@ async function run() {
         const booksCollection = client.db("usedBooks").collection("books");
         const bookingCollection = client.db("usedBooks").collection("bookings");
 
-        console.log('databse connected.....');
+        //getting bookings(my orders)
+        app.get('/bookings', verifyJwt, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send('Forbidden Access')
+            }
+            console.log(email);
+            const query = {
+                buyerEmail: email
+            }
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings)
+        })
 
 
         //api for sending jwt token to the client
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
-            console.log(email)
+            //console.log(email)
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
@@ -56,7 +87,7 @@ async function run() {
 
         app.post('/allbooks', async (req, res) => {
             const doc = req.body;
-            console.log(doc);
+            //console.log(doc);
             const book = await booksCollection.insertOne(doc);
             res.send(book);
         })
@@ -78,8 +109,9 @@ async function run() {
 
         //getting books by category
         app.get('/books/:categoryId', async (req, res) => {
+
             const id = req.params.categoryId;
-            console.log(id)
+            //console.log(id)
             const query = {
                 categoryId: id,
             };
@@ -97,10 +129,10 @@ async function run() {
             res.send(books);
         })
 
-        //all seller all buyers by role 
+        //all seller and all buyers by role 
         app.get('/users', async (req, res) => {
             const role = req.query.role;
-            console.log(role)
+            //console.log(role)
             const query = {
                 userRole: role,
             }
@@ -116,16 +148,7 @@ async function run() {
         })
 
 
-        //getting bookings
-        app.get('/bookings', async (req, res) => {
-            const email = req.query.email;
-            console.log(email);
-            const query = {
-                buyerEmail: email
-            }
-            const bookings = await bookingCollection.find(query).toArray();
-            res.send(bookings)
-        })
+
 
 
 
