@@ -151,14 +151,14 @@ async function run() {
 
         //getting books by category
         app.get('/books/:categoryId', async (req, res) => {
-
             const id = req.params.categoryId;
             //console.log(id)
             const query = {
                 categoryId: id,
             };
             const books = await booksCollection.find(query).toArray();
-            res.send(books);
+            const availableBooks = books.filter(book => !book?.paid === true)
+            res.send(availableBooks);
         })
 
         //all books by email(posted books of the seller)
@@ -208,7 +208,7 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const payment = req.body;
             const result = await paymentCollection.insertOne(payment);
-            
+
             const postid = payment.sellerPostId;
             const filter = { _id: ObjectId(postid) }
             const updatedDocBook = {
