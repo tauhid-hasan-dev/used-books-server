@@ -43,6 +43,7 @@ async function run() {
         const categoryCollection = client.db("usedBooks").collection("categories");
         const booksCollection = client.db("usedBooks").collection("books");
         const bookingCollection = client.db("usedBooks").collection("bookings");
+        const paymentCollection = client.db("usedBooks").collection("payments");
 
         //getting bookings(my orders)
         app.get('/bookings', verifyJwt, async (req, res) => {
@@ -202,6 +203,21 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
+        })
+
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            const id = payment.bookingId;
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updateBooking = await bookingCollection.updateOne(query, updatedDoc)
+            res.send(result);
         })
 
 
