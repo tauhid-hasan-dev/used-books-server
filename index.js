@@ -121,20 +121,21 @@ async function run() {
 
         })
 
-
+        //categories
         app.get('/categories', async (req, res) => {
             const query = {};
             const categories = await categoryCollection.find(query).toArray();
             res.send(categories);
         })
 
+
+        //listed books by seller
         app.post('/allbooks', async (req, res) => {
             const doc = req.body;
             //console.log(doc);
             const book = await booksCollection.insertOne(doc);
             res.send(book);
         })
-
 
 
         //getting books by category
@@ -152,30 +153,17 @@ async function run() {
         //all books by email(posted books of the seller)
         app.get('/books', async (req, res) => {
             const email = req.query.email;
-
-            /*  console.log(advertised); */
             const query = {
                 sellerEmail: email
             }
-
             const books = await booksCollection.find(query).toArray();
             res.send(books);
 
         })
 
-
-        /* app.get('/books/adds', async (req, res) => {
-            const filter = {
-                advertised
-            }
-            const books = await booksCollection.find(filter).toArray();
-            res.send(books);
-        }) */
-
         //all seller and all buyers by role 
         app.get('/users', async (req, res) => {
             const role = req.query.role;
-            //console.log(role)
             const query = {
                 userRole: role,
             }
@@ -215,6 +203,7 @@ async function run() {
             }
         })
 
+        //seller verification bu admin
         app.put('/users/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
@@ -228,7 +217,7 @@ async function run() {
             res.send(result)
         })
 
-
+        //seller and buyer delete
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
@@ -236,6 +225,7 @@ async function run() {
             res.send(result);
         })
 
+        //stripe payment method api
         app.post('/create-payment-intent', async (req, res) => {
             const booking = req.body;
             const price = booking.productPrice;
@@ -252,6 +242,8 @@ async function run() {
             });
         })
 
+
+        //updating data after payment
         app.post('/payments', async (req, res) => {
             const payment = req.body;
 
@@ -282,7 +274,7 @@ async function run() {
 
 
 
-
+        //posting adds to the homepage by seller
         app.post('/adds', async (req, res) => {
             const add = req.body;
 
@@ -309,25 +301,16 @@ async function run() {
 
         });
 
+        //getting adds into the home page after getting advertised
 
         app.get('/adds', async (req, res) => {
             const query = {};
             const adds = await addCollection.find(query).toArray();
-
             const querybooks = {};
             const books = await booksCollection.find(querybooks).toArray();
             const advertisedBooks = books.filter(book => book?.advertised && !book?.paid)
-            /*    adds.map(add => {
-                   const advertisedBooks = books.filter(book => book._id === add.sellerPostId);
-                   console.log(advertisedBooks);
-               }) */
             res.send(advertisedBooks);
         })
-
-
-
-
-
 
 
 
