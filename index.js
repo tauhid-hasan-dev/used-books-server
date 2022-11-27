@@ -236,6 +236,30 @@ async function run() {
             res.send(result)
         })
 
+        //report to admin
+
+        app.put('/reported/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    reported: 'Reported'
+                },
+            };
+            const result = await booksCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+        app.get('/reporteditems', async (req, res) => {
+            const query = {}
+            const books = await booksCollection.find(query).toArray();
+            const reportedItems = books.filter(book => book.reported);
+            res.send(reportedItems)
+        })
+
+
+
         //seller and buyer delete
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
