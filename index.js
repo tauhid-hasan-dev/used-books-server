@@ -180,6 +180,16 @@ async function run() {
             res.send(seller);
         })
 
+
+        app.get('/seller', async (req, res) => {
+            const email = req.query.email;
+            const query = {
+                email: email
+            }
+            const user = await usersCollection.findOne(query);
+            res.send(user)
+        })
+
         //storing booking info and preventing multiple bookings
         app.post('/bookings', async (req, res) => {
             const doc = req.body;
