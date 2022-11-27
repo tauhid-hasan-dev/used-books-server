@@ -44,6 +44,7 @@ async function run() {
         const booksCollection = client.db("usedBooks").collection("books");
         const bookingCollection = client.db("usedBooks").collection("bookings");
         const paymentCollection = client.db("usedBooks").collection("payments");
+        const addCollection = client.db("usedBooks").collection("adds");
 
         //getting bookings(my orders)
         app.get('/bookings', verifyJwt, async (req, res) => {
@@ -134,20 +135,7 @@ async function run() {
             res.send(book);
         })
 
-        //storing user info to the database and preventing google users data duplicating
-        app.post('/users', async (req, res) => {
-            const doc = req.body;
-            const query = {
-                email: doc.email
-            }
-            const isExits = await usersCollection.findOne(query)
-            if (isExits) {
-                return res.send({ message: 'This user already exists' })
-            } else {
-                const user = await usersCollection.insertOne(doc);
-                res.send(user);
-            }
-        })
+
 
         //getting books by category
         app.get('/books/:categoryId', async (req, res) => {
@@ -164,12 +152,25 @@ async function run() {
         //all books by email(posted books of the seller)
         app.get('/books', async (req, res) => {
             const email = req.query.email;
+
+            /*  console.log(advertised); */
             const query = {
                 sellerEmail: email
             }
+
             const books = await booksCollection.find(query).toArray();
             res.send(books);
+
         })
+
+
+        /* app.get('/books/adds', async (req, res) => {
+            const filter = {
+                advertised
+            }
+            const books = await booksCollection.find(filter).toArray();
+            res.send(books);
+        }) */
 
         //all seller and all buyers by role 
         app.get('/users', async (req, res) => {
@@ -231,6 +232,57 @@ async function run() {
 
             res.send(result);
         })
+
+        //storing user info to the database and preventing google users data duplicating
+        app.post('/users', async (req, res) => {
+            const doc = req.body;
+            const query = {
+                email: doc.email
+            }
+            const isExits = await usersCollection.findOne(query)
+            if (isExits) {
+                return res.send({ message: 'This user already exists' })
+            } else {
+                const user = await usersCollection.insertOne(doc);
+                res.send(user);
+            }
+        })
+
+
+        app.post('/adds', async (req, res) => {
+            const add = req.body;
+
+            const id = add.sellerPostId;
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    advertised: 'advertised'
+                }
+            }
+            const advertisedBook = await booksCollection.updateOne(query, updatedDoc)
+
+            const filter = {
+                sellerPostId: add.sellerPostId
+            }
+
+            const isExits = await addCollection.findOne(filter)
+            if (isExits) {
+                return res.send({ message: 'This book has already been advertised' })
+            } else {
+                const adds = await addCollection.insertOne(add)
+                res.send(adds)
+            }
+
+        });
+
+
+        app.get('/adds', async (req, res) => {
+            const query = {};
+            const adds = await addCollection.find(query).toArray();
+            res.send(adds)
+        })
+
+
 
 
 
