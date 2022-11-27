@@ -157,7 +157,7 @@ async function run() {
                 categoryId: id,
             };
             const books = await booksCollection.find(query).toArray();
-            const availableBooks = books.filter(book => !book?.paid === true)
+            const availableBooks = books.filter(book => !book?.paid)
             res.send(availableBooks);
         })
 
