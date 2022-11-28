@@ -171,7 +171,7 @@ async function run() {
         })
 
         //all seller and all buyers by role 
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJwt, async (req, res) => {
             const role = req.query.role;
             const query = {
                 userRole: role,
@@ -346,7 +346,7 @@ async function run() {
 
         //getting adds into the home page after getting advertised
 
-        app.get('/adds', async (req, res) => {
+        app.get('/adds', verifyJwt, async (req, res) => {
             const query = {};
             const adds = await addCollection.find(query).toArray();
             const querybooks = {};
